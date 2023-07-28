@@ -1,0 +1,7 @@
+venv/
+.vscode/
+all.xml
+categories.json
+subcategories.json
+output.*
+result.*
