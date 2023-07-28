@@ -5,3 +5,4 @@ categories.json
 subcategories.json
 output.*
 result.*
+__pycache__
