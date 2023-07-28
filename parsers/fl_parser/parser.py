@@ -1,17 +1,19 @@
+import os, sys 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
 import asyncio
 from pyppeteer import launch
 from pyppeteer_stealth import stealth
 import bs4
 import re
-from fake_useragent import FakeUserAgent
-from rss import get_rss, parse_rss
+from fake_useragent import UserAgent
+from .rss import get_rss, parse_rss
 from random import randint
 from config import subcategories
 
 import time
 
 
-ua = FakeUserAgent()
+ua = UserAgent()
 base_url = 'https://www.fl.ru/projects/'
 
 
@@ -28,22 +30,25 @@ class FL():
                 'deadline': '',
                 'description': ''
                 }
-
         soup = bs4.BeautifulSoup(content, 'lxml')
-        
-        # Проверка для всех ли пользователей
-        if soup.find('span', attrs={'data-tip-width': 140}):
-            extra['for_all'] = True
 
-        # Получение описания
-        extra['description'] = soup.find(attrs={"id": re.compile('projectp')}).text
+        try: 
+            # Проверка для всех ли пользователей
+            if soup.find('span', attrs={'data-tip-width': 140}):
+                extra['for_all'] = True
 
-        # Получение цены и дедлайна
-        div = soup.find('div', class_=re.compile('unmobile flex-shrink'))
-        
-        divs = div.find_all('div', class_=re.compile('text-4'))
-        extra['price'] = divs[0].span.text.strip()
-        extra['deadline'] = divs[1].span.text.strip()
+            # Получение описания
+            extra['description'] = soup.find(attrs={"id": re.compile('projectp')}).text
+
+            # Получение цены и дедлайна
+            div = soup.find('div', class_=re.compile('unmobile flex-shrink'))
+            
+            divs = div.find_all('div', class_=re.compile('text-4'))
+            extra['price'] = divs[0].span.text.strip()
+            extra['deadline'] = divs[1].span.text.strip()
+        except Exception as e:
+            print(e)
+            return None
 
         return extra
 
@@ -119,8 +124,11 @@ class FL():
             if new_orders:
                 for order in new_orders:
                     order = self.get_more_info(order)
+                    if not order:
+                        orders.remove(order)
                     await asyncio.sleep(randint(1,5))
             return new_orders
+
 
     async def update_all(self):
         new_orders = []
@@ -133,18 +141,22 @@ class FL():
 
 
 if __name__ == '__main__':
-    # import os, sys 
-    # sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
+
     # with open('all.xml', encoding="utf8") as file:
     #     xml = file.read()
-    parser = FL()
-    loop = asyncio.get_event_loop()
-    for i in range(2):
-        orders = loop.run_until_complete(parser.update_all())
-        print(orders)
-        print(parser.last_ids)
-        time.sleep(120)
+    # import pprint
+    # parser = FL()
+    # loop = asyncio.get_event_loop()
+    # content = loop.run_until_complete(get_rss())
+    # orders = parse_rss(content)
+    # order = loop.run_until_complete(parser.get_more_info(orders[1]))
+    # pprint.pprint(order)
 
     # loop.run_until_complete(make_screenshot('https://www.fl.ru/projects/5200050/2d-igra-dlya-obucheniya-.html'))
     # order = {'link': 'https://www.fl.ru/projects/5201518/razrabotat-avtomatizirovannyiy-raschet-kp-na-osnove-praysa-po-oborudovaniyu-i-praysa-po-rabotam.html'}
     # loop.run_until_complete(get_more_info(order))
+    list = [1,2,3,4,5]
+    for i, item in enumerate(list):
+        if item == 4:
+            list.remove(i)
+        print(item)

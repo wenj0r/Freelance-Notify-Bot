@@ -17,7 +17,7 @@ async def get_rss(main_cat: int= None, sub_cat: int = None):
         resp = await network._get(s, rss_url, params=params)
         if resp:
             content = await resp.read()
-            return content.decode()
+            return content.decode('utf-8')
 
 
 def parse_rss(xml):

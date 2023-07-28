@@ -6,3 +6,5 @@ subcategories.json
 output.*
 result.*
 __pycache__
+config.py
+.env
