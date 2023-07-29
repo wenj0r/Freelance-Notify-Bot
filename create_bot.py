@@ -1,13 +1,12 @@
 from aiogram import types, Dispatcher, Bot
 from dotenv import load_dotenv
 from os import getenv
-import asyncio
 import re
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from parsers.fl_parser.parser import FL
 
-from config import users
+from config import users, update_interval
 from loggers import main_logger as logger
 load_dotenv()
 
@@ -15,6 +14,7 @@ TOKEN = getenv('TOKEN')
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+
 
 """
 Поведение бота нужно описывать с помощью обработчиков. Ниже обычный echo для примера.
@@ -29,13 +29,13 @@ async def start(message: types.Message):
 
 def message_from_order(order: dict):
     url = 'https://www.fl.ru/projects/' + order['id']
-    message = f"""
-            <b>{order['title']}</b>\n
-            Описание: {order['description'].strip()}
-            Цена: {order['price']}
-            Дедлайн: {order['deadline']}
-            <a href="{url}">Ссылка</a>
-        """
+
+    message = f"<b>{order['title'].strip()}</b>\n\n" \
+        f"<b>Категория:</b> {order['category'].strip()}\n\n" \
+        f"<b>Описание:</b> {order['description'].strip()}\n\n" \
+        f"<b>Цена:</b> {order['price'].strip()}\n" \
+        f"<b>Дедлайн:</b> {order['deadline'].strip()}\n\n" \
+        f'<a href="{url}">Ссылка</a>'
 
     pattern = r'\xa0'
     message = re.sub(pattern, r'', message)
@@ -48,12 +48,12 @@ async def scheduled():
     if new_orders:
         for order in new_orders:
             for user in users:
-                await bot.send_message(user, message_from_order(order), parse_mode='HTML')
+                await bot.send_message(user, message_from_order(order), parse_mode='HTML', disable_web_page_preview=True)
 
 
 async def start():
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(scheduled, trigger='interval', seconds=60)
+    scheduler.add_job(scheduled, trigger='interval', seconds=update_interval)
     scheduler.start()
 
 

@@ -7,9 +7,12 @@ FOLDER_LOG = 'logs'
 LOGGING_CONFIG_FILE = 'logs/loggers.json'
 
 
-def create_log_folder(folder=FOLDER_LOG):
-    if not os.path.exists(folder):
-        os.mkdir(folder)
+def create_log_folder():
+    if not os.path.exists(FOLDER_LOG):
+        os.mkdir(FOLDER_LOG)
+    if not os.path.exists(LOGGING_CONFIG_FILE):
+        with open(LOGGING_CONFIG_FILE, 'w') as file:
+            pass
 
 
 def getLogger(name, template='default'):
@@ -24,7 +27,7 @@ def getLogger(name, template='default'):
     finally:
         return logging.getLogger(name)
 
-main_logger = getLogger('__main__')
+main_logger = getLogger('"uvicorn.access"')
 
 if __name__ == '__main__':
     logger = getLogger('__main__')

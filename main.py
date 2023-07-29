@@ -46,8 +46,6 @@ async def on_startup():
     await start()
     
 
-
-
 # Доставляет изменения боту при получении POST запроса от Telegram API
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
@@ -71,6 +69,7 @@ async def on_shutdown():
 
 """
 Запускаем работу бота через Web Сервер Unicorn
-uvicorn main:app --reload
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-config ./logs/loggers.json
 Флаг --reload перезапускает сервер при каждом изменении и сохранении кода
+Флаг --log-config загружает конфиг для логирования извне
 """

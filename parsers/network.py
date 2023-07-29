@@ -13,14 +13,14 @@ async def _get(session: ClientSession, url: str, params = None):
             return resp
 
         elif resp.status == 403:
-            print('Need Proxy')
+            logger.error('Need Proxy')
             return
 
         else:
-            print(resp.status)
+            logger.error(resp.status)
 
     except Exception as e:
-        print(e)
+        logger.exception(e)
         return
 
 

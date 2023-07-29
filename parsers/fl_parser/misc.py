@@ -4,7 +4,7 @@ import bs4
 
 import json
 with open('subcategories.json', encoding='UTF-8') as f:
-    subcategories_list = json.load(f) 
+    subcategories_list = json.load(f)
 
 
 def get_category_ids():

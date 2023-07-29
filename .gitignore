@@ -1,8 +1,6 @@
 venv/
 .vscode/
 all.xml
-categories.json
-subcategories.json
 output.*
 result.*
 __pycache__
@@ -10,3 +8,4 @@ config.py
 .env
 /logs
 ngrok.exe
+test/
