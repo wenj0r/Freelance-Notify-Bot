@@ -3,7 +3,7 @@ import json
 import bs4
 
 import json
-with open('subcategories.json') as f:
+with open('subcategories.json', encoding='UTF-8') as f:
     subcategories_list = json.load(f) 
 
 
