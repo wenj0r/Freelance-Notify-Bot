@@ -8,3 +8,5 @@ result.*
 __pycache__
 config.py
 .env
+/logs
+ngrok.exe

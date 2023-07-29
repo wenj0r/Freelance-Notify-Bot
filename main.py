@@ -8,6 +8,8 @@ from os import getenv
 from time import sleep
 from asyncio import sleep as asleep
 
+from loggers import main_logger as logger
+
 # Загружаем из окружения адрес http тунеля и токен
 load_dotenv()
 TOKEN = getenv('TOKEN')
@@ -29,8 +31,11 @@ async def on_startup():
         await bot.set_webhook(
             url=WEBHOOK_URL
         )
+        logger.debug(f'Поставлен Webhook по адресу {WEBHOOK_URL}')
+
     # Реализация skip_updates
     if SKIP_UPDATES:
+        logger.info('Все обновления пропущены!')
         await bot.delete_webhook(drop_pending_updates=True)
         sleep(1) # Без задержки приложение ложится
         await asleep(0)

@@ -8,7 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from parsers.fl_parser.parser import FL
 
 from config import users
-
+from loggers import main_logger as logger
 load_dotenv()
 
 TOKEN = getenv('TOKEN')

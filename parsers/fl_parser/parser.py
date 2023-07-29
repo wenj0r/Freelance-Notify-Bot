@@ -8,9 +8,11 @@ import re
 from fake_useragent import UserAgent
 from .rss import get_rss, parse_rss
 from random import randint
-from config import subcategories
 
-import time
+from config import subcategories
+from .misc import subcategories_list
+
+from loggers import main_logger as logger
 
 
 ua = UserAgent()
@@ -47,8 +49,8 @@ class FL():
             extra['price'] = divs[0].span.text.strip()
             extra['deadline'] = divs[1].span.text.strip()
         except Exception as e:
-            print(e)
-            return None
+            logger.exception(e)
+            return
 
         return extra
 
@@ -82,6 +84,8 @@ class FL():
 
         extra = self.parse_order_page(content)
         order.update(extra)
+
+        logger.info(f'Обработано объявление #{order.get("id")}')
 
         return order
 
@@ -120,7 +124,7 @@ class FL():
         
         if orders:
             new_orders = self.get_new_orders_in_category(orders, subcategory)
-
+            logger.debug(f'Проверена категория {subcategories_list.get(subcategory)}. Новых объявлений: {len(new_orders)}')
             if new_orders:
                 for order in new_orders:
                     order = self.get_more_info(order)

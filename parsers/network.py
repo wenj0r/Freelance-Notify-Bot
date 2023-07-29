@@ -1,5 +1,6 @@
 from aiohttp import ClientSession
 from fake_useragent import FakeUserAgent
+from loggers import main_logger as logger
 
 
 ua = FakeUserAgent()

@@ -2,6 +2,10 @@ import requests
 import json
 import bs4
 
+import json
+with open('subcategories.json') as f:
+    subcategories_list = json.load(f) 
+
 
 def get_category_ids():
     rss_url = f'https://www.fl.ru/rss/all.xml'
@@ -61,7 +65,7 @@ def get_category_ids():
             else:
                 i -= 1
                 continue
-            sub_categories[name] = i
+            sub_categories[i] = name
         except IndexError:
             continue
         except Exception as e:

@@ -6,6 +6,8 @@ from aiohttp import ClientSession
 import bs4
 from parsers import network
 
+from loggers import main_logger as logger
+
 async def get_rss(main_cat: int= None, sub_cat: int = None):
     rss_url = f'https://www.fl.ru/rss/all.xml'
     
