@@ -1,7 +1,6 @@
 import os, sys 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-print(sys.path)
 from aiogram import types, Dispatcher, Bot
 from aiogram.utils import executor
 
