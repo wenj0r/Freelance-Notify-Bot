@@ -22,5 +22,3 @@ async def _get(session: ClientSession, url: str, params = None):
     except Exception as e:
         logger.exception(e)
         return
-
-

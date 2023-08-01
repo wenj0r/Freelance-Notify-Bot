@@ -1,1 +1,1 @@
-from . import fl_parser
+from .fl_parser import *
