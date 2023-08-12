@@ -43,9 +43,10 @@ async def scheduled():
         for order in new_orders:
             try:
                 for user in USERS:
-                    await bot.send_message(user, message_from_order(order), parse_mode='HTML', disable_web_page_preview=True)
+                    text = message_from_order(order)
+                    await bot.send_message(user, text, parse_mode='HTML', disable_web_page_preview=True)
             except Exception as e:
-                logger.exception(e)
+                logger.error(e)
 
 
 def start():

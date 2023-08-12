@@ -4,7 +4,7 @@ from os import getenv
 load_dotenv()
 
 USERS = [369558396]
-INTERVAL = 60
+INTERVAL = int(getenv('INTERVAL'))
 TOKEN = getenv('TOKEN')
 SKIP_UPDATES = True
 
