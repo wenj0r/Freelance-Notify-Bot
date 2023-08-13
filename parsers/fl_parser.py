@@ -52,7 +52,6 @@ class FL():
 
 
     async def getOrderInfo(self, id: str):
-
         logger.debug(f'Обрабатывается объявление #{id}')
         url = base_url + id
         
@@ -122,7 +121,12 @@ class FL():
         else:
             new_orders = orders
 
-        self.previous_orders = orders
+        # Список передыдущих заказов содержит только последние 2000 заказа
+        self.previous_orders += new_orders
+        lenght = len(self.previous_orders)
+        if lenght > 2000:
+            self.previous_orders = self.previous_orders[lenght-2000:]
+
         return new_orders
 
 
