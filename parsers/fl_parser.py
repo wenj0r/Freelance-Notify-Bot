@@ -16,7 +16,7 @@ cookies_path = './cookies.pickle'
 class FL():
     def __init__(self, headless: bool = True):
         self.headless = headless
-        self.previous_orders = 0
+        self.previous_orders = []
         self.start_parm = {
         'headless' : self.headless,
         'autoClose': False,
