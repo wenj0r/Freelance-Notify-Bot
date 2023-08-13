@@ -16,7 +16,7 @@ cookies_path = './cookies.pickle'
 class FL():
     def __init__(self, headless: bool = True):
         self.headless = headless
-        self.previous_orders = []
+        self.previous_orders_id = []
         self.start_parm = {
         'headless' : self.headless,
         'autoClose': False,
@@ -114,20 +114,21 @@ class FL():
             return
 
 
-    def newOrdersCheck(self, orders: list, subcategory: str = None):
+    def newOrdersCheck(self, orders_id: list):
         # На случай, если скрипт только запустили
-        if self.previous_orders:
-            new_orders = self.list_difference(orders, self.previous_orders)
+        if self.previous_orders_id:
+            new_orders_id = self.list_difference(orders_id, self.previous_orders_id)
         else:
-            new_orders = orders
+            new_orders_id = orders_id
 
         # Список передыдущих заказов содержит только последние 2000 заказа
-        self.previous_orders += new_orders
-        lenght = len(self.previous_orders)
-        if lenght > 2000:
-            self.previous_orders = self.previous_orders[lenght-2000:]
+        self.previous_orders_id += new_orders_id
 
-        return new_orders
+        lenght = len(self.previous_orders_id)
+        if lenght > 2000:
+            self.previous_orders_id = self.previous_orders_id[lenght-2000:]
+
+        return new_orders_id
 
 
     async def update(self):
@@ -177,6 +178,7 @@ class FL():
                 new_orders.append(order)
 
         logger.debug(f'Проверка... Новых запросов: {len(new_orders)}')
+        logger.debug(f'Всего обработано запросов: {len(self.previous_orders_id)}')
         await self.browser.close()
 
         return new_orders
