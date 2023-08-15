@@ -111,8 +111,7 @@ class FL():
         new_orders_id = []
         for order_id in orders_id:
             if not order_id in self.previous_orders_id:
-                if not self.skip:
-                    new_orders_id.append(order_id)
+                new_orders_id.append(order_id)
 
         self.previous_orders_id += new_orders_id
 
@@ -121,7 +120,10 @@ class FL():
         if lenght > 2000:
             self.previous_orders_id = self.previous_orders_id[lenght-2000:]
 
-        return new_orders_id
+        if not self.skip:
+            return new_orders_id
+        else:
+            return []
 
 
     async def update(self):
