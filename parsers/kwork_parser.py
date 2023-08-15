@@ -2,11 +2,10 @@ from pyppeteer import launch
 from pyppeteer_stealth import stealth
 from fake_useragent import UserAgent
 from loggers import main_logger as logger
+from random import randint
 import pickle
 import os
-import json
 import bs4
-import random
 import asyncio
 
 
@@ -135,17 +134,11 @@ class KWork():
             new_orders = self.parseNewOrders(content=content)
             if new_orders: orders += new_orders
             
-            await asyncio.sleep(1)
+            await asyncio.sleep(randint(1,2))
             num += 1
 
-        logger.debug(f'\n[KWORK] Новых запросов: {len(orders)}')
+        logger.debug(f'[KWORK] Новых запросов: {len(orders)}')
         await browser.close()
 
         return orders
-
-kw = KWork()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(kw.update())     
-
 

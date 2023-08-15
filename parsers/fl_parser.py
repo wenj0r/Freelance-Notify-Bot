@@ -161,7 +161,7 @@ class FL():
         content = await self.main_page.content()
         order_ids = await self.parseOrders(content)
         new_orders_ids = self.newOrdersCheck(order_ids)
-        logger.debug(f'\n[FL] Проверка... Новых запросов: {new_orders_ids}')
+        logger.debug(f'[FL] Проверка... Новых запросов: {new_orders_ids}')
 
         new_orders = []
         for order_id in new_orders_ids:
