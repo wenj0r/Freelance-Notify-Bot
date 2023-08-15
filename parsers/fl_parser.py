@@ -110,20 +110,19 @@ class FL():
             return order
 
         except Exception as e:
-            logger.error('Не удалось пропарсить объявление!')
+            logger.exception(e)
             return
 
 
     def newOrdersCheck(self, orders_id: list):
-        # На случай, если скрипт только запустили
-        if self.previous_orders_id:
-            new_orders_id = self.list_difference(orders_id, self.previous_orders_id)
-        else:
-            new_orders_id = orders_id
+        new_orders_id = []
+        for order_id in orders_id:
+            if not order_id in self.previous_orders_id:
+                new_orders_id.append(order_id)
 
-        # Список передыдущих заказов содержит только последние 2000 заказа
         self.previous_orders_id += new_orders_id
 
+        # Список передыдущих заказов содержит только последние 2000 заказа
         lenght = len(self.previous_orders_id)
         if lenght > 2000:
             self.previous_orders_id = self.previous_orders_id[lenght-2000:]
@@ -167,9 +166,9 @@ class FL():
 
         # Парсинг новых заказов
         content = await self.main_page.content()
-
         order_ids = await self.parseOrders(content)
         new_orders_ids = self.newOrdersCheck(order_ids)
+        logger.debug(f'\nПроверка... Новых запросов: {new_orders_ids}')
 
         new_orders = []
         for order_id in new_orders_ids:
@@ -177,7 +176,6 @@ class FL():
             if order:
                 new_orders.append(order)
 
-        logger.debug(f'Проверка... Новых запросов: {len(new_orders)}')
         logger.debug(f'Всего обработано запросов: {len(self.previous_orders_id)}')
         await self.browser.close()
 
