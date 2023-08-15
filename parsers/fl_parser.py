@@ -17,6 +17,7 @@ class FL():
     def __init__(self, headless: bool = True):
         self.headless = headless
         self.previous_orders_id = []
+        self.skip = True
         self.start_parm = {
         'headless' : self.headless,
         'autoClose': False,
@@ -120,7 +121,8 @@ class FL():
         if lenght > 2000:
             self.previous_orders_id = self.previous_orders_id[lenght-2000:]
 
-        return new_orders_id
+        if not self.skip:
+            return new_orders_id
 
 
     async def update(self):
@@ -156,6 +158,12 @@ class FL():
             cookies = pickle.load(f)
             await self.main_page.setCookie(*cookies)
             await self.main_page.reload()
+        
+        # Выдаст результат только, если история не пуста 
+        if self.previous_orders_id:
+            self.skip = False
+        else:
+            logger.info('Первый запуск. Собираем существующие заказы...')
 
         # Парсинг новых заказов
         content = await self.main_page.content()
