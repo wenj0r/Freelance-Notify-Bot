@@ -17,16 +17,16 @@ from config import TOKEN
 
 
 def message_from_order(order: dict, tag: str):
-    url = 'https://www.fl.ru/projects/' + order['id']
-
     try:
         message = f"<b>{order.get('title').strip()}</b>\n\n" \
             f"<b>Описание:</b> {order.get('description').strip()}\n\n" \
-            f"<b>Цена:</b> {order.get('price').strip()}\n" \
-            f"<b>Дедлайн:</b> {order.get('deadline').strip()}\n\n" \
-            f"<b>Категория:</b> {order.get('category').strip()}\n\n" \
-            f'<a href="{url}">Ссылка</a>\n\n' \
-            f'#{tag}'
+            f"<b>Цена:</b> {order.get('price').strip()}\n"
+        if order.get('deadline'):
+            message += f"<b>Дедлайн:</b> {order.get('deadline').strip()}\n\n"
+        if order.get('category'):
+            message += f"<b>Категория:</b> {order.get('category').strip()}\n\n"
+        message += f'<a href="{order["link"]}">Ссылка</a>\n\n' \
+                   f'#{tag}'
 
         pattern = r'\xa0'
         message = re.sub(pattern, r'', message)

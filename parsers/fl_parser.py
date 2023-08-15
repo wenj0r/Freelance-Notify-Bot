@@ -62,6 +62,7 @@ class FL():
         
         if order:
             order['id'] = id
+            order['link'] = 'https://www.fl.ru/projects/' + id
             return order
         else:
             logger.debug(f"[FL] Заказ #{id} пропущен")
