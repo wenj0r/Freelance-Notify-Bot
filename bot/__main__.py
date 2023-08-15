@@ -8,6 +8,7 @@ import re
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from parsers.fl_parser import FL
+from parsers.kwork_parser import KWork
 
 from config import USERS, INTERVAL
 from loggers import main_logger as logger
@@ -15,7 +16,7 @@ from loggers import main_logger as logger
 from config import TOKEN
 
 
-def message_from_order(order: dict):
+def message_from_order(order: dict, tag: str):
     url = 'https://www.fl.ru/projects/' + order['id']
 
     try:
@@ -24,7 +25,8 @@ def message_from_order(order: dict):
             f"<b>Цена:</b> {order.get('price').strip()}\n" \
             f"<b>Дедлайн:</b> {order.get('deadline').strip()}\n\n" \
             f"<b>Категория:</b> {order.get('category').strip()}\n\n" \
-            f'<a href="{url}">Ссылка</a>'
+            f'<a href="{url}">Ссылка</a>\n\n' \
+            f'#{tag}'
 
         pattern = r'\xa0'
         message = re.sub(pattern, r'', message)
@@ -36,14 +38,27 @@ def message_from_order(order: dict):
         logger.exception(e)
 
 
-async def scheduled():
+async def FL_scheduled():
     new_orders = await fl.update()
 
     if new_orders:
         for order in new_orders:
             try:
                 for user in USERS:
-                    text = message_from_order(order)
+                    text = message_from_order(order, tag='FL')
+                    await bot.send_message(user, text, parse_mode='HTML', disable_web_page_preview=True)
+            except Exception as e:
+                logger.error(e)
+
+
+async def KWork_scheduled():
+    new_orders = await kw.update()
+
+    if new_orders:
+        for order in new_orders:
+            try:
+                for user in USERS:
+                    text = message_from_order(order, tag='KWork')
                     await bot.send_message(user, text, parse_mode='HTML', disable_web_page_preview=True)
             except Exception as e:
                 logger.error(e)
@@ -52,12 +67,13 @@ async def scheduled():
 def start():
     logger.info('Бот вышел в онлайн')
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(scheduled, trigger='interval', seconds=INTERVAL)
+    scheduler.add_job(FL_scheduled, trigger='interval', seconds=INTERVAL)
     scheduler.start()
 
 
 if __name__ == '__main__':
     fl = FL()
+    kw = KWork()
     bot = Bot(token=TOKEN)
     dp = Dispatcher(bot)
     executor.start_polling(dp, skip_updates=True, on_startup=start())

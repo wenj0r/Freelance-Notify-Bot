@@ -11,7 +11,7 @@ import os
 
 ua = UserAgent()
 base_url = 'https://www.fl.ru/projects/'
-cookies_path = './cookies.pickle'
+cookies_path = './fl.pickle'
 
 class FL():
     def __init__(self, headless: bool = True):
@@ -31,13 +31,6 @@ class FL():
             '--enable-extensions'
             ]
         }
-        
-
-    def list_difference(self, list1, list2):
-        set1 = set(list1)
-        set2 = set(list2)
-        difference = set1.symmetric_difference(set2)
-        return list(difference)
 
 
     async def parseOrders(self, content):
@@ -71,12 +64,11 @@ class FL():
             order['id'] = id
             return order
         else:
-            logger.debug(f"Заказ #{id} пропущен")
+            logger.debug(f"[FL] Заказ #{id} пропущен")
             return         
 
 
     def parseOrderPage(self, content):
-
         order = {}
 
         soup = bs4.BeautifulSoup(content, 'lxml')
@@ -168,7 +160,7 @@ class FL():
         content = await self.main_page.content()
         order_ids = await self.parseOrders(content)
         new_orders_ids = self.newOrdersCheck(order_ids)
-        logger.debug(f'\nПроверка... Новых запросов: {new_orders_ids}')
+        logger.debug(f'\n[FL] Проверка... Новых запросов: {new_orders_ids}')
 
         new_orders = []
         for order_id in new_orders_ids:
@@ -176,7 +168,7 @@ class FL():
             if order:
                 new_orders.append(order)
 
-        logger.debug(f'Всего обработано запросов: {len(self.previous_orders_id)}')
+        logger.debug(f'[FL] Всего обработано запросов: {len(self.previous_orders_id)}')
         await self.browser.close()
 
         return new_orders
