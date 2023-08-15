@@ -25,8 +25,8 @@ def message_from_order(order: dict, tag: str):
         if order.get('deadline'):
             message += f"<b>Дедлайн:</b> {order.get('deadline').strip()}\n\n"
         if order.get('category'):
-            message += f"<b>Категория:</b> {order.get('category').strip()}\n\n"
-        message += f'<a href="{order["link"]}">Ссылка</a>\n\n' \
+            message += f"<b>Категория:</b> {order.get('category').strip()}\n"
+        message += f'\n<a href="{order["link"]}">Ссылка</a>\n\n' \
                    f'#{tag}'
 
         pattern = r'\xa0'

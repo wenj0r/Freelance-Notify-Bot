@@ -9,3 +9,4 @@ __pycache__
 ngrok.exe
 test/
 *.pickle
+cookies/
