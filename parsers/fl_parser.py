@@ -104,8 +104,8 @@ class FL():
             # Получение цены и дедлайна
             div = soup.find('div', class_=re.compile('unmobile flex-shrink'))
             divs = div.find_all('div', class_=re.compile('text-4'))
-            order['price'] = divs[0].span.text.strip()
-            order['deadline'] = divs[1].span.text.strip()
+            if divs[0]: order['price'] = divs[0].span.text.strip()
+            if divs[1]: order['deadline'] = divs[1].span.text.strip()
 
             return order
 
