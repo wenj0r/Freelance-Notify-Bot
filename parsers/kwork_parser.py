@@ -11,7 +11,7 @@ import asyncio
 
 ua = UserAgent()
 base_url = 'https://kwork.ru/'
-cookies_path = './kwork.pickle'
+cookies_path = './cookies/kwork.pickle'
 
 
 class KWork():
@@ -93,6 +93,10 @@ class KWork():
 
             await self.main_page.waitForResponse('https://kwork.ru/projects?a=1', timeout=0)
             cookies = await self.main_page.cookies()
+
+            if not os.path.exists('./cookies'):
+                os.mkdir('./cookies')
+
             with open(cookies_path, 'wb') as f:
                 pickle.dump(cookies, f)
 
@@ -138,6 +142,7 @@ class KWork():
             num += 1
 
         logger.debug(f'[KWORK] Новых запросов: {len(orders)}')
+        logger.debug(f'[FL] Всего обработано запросов: {len(self.previous_order_links)}')
         await browser.close()
 
         return orders

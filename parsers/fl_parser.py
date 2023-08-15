@@ -11,7 +11,7 @@ import os
 
 ua = UserAgent()
 base_url = 'https://www.fl.ru/projects/'
-cookies_path = './fl.pickle'
+cookies_path = './cookies/fl.pickle'
 
 class FL():
     def __init__(self, headless: bool = True):
@@ -32,7 +32,6 @@ class FL():
             '--enable-extensions'
             ]
         }
-
 
     async def parseOrders(self, content):
         soup = bs4.BeautifulSoup(content, 'lxml')
@@ -112,7 +111,8 @@ class FL():
         new_orders_id = []
         for order_id in orders_id:
             if not order_id in self.previous_orders_id:
-                new_orders_id.append(order_id)
+                if not self.skip:
+                    new_orders_id.append(order_id)
 
         self.previous_orders_id += new_orders_id
 
@@ -121,8 +121,7 @@ class FL():
         if lenght > 2000:
             self.previous_orders_id = self.previous_orders_id[lenght-2000:]
 
-        if not self.skip:
-            return new_orders_id
+        return new_orders_id
 
 
     async def update(self):
@@ -139,6 +138,9 @@ class FL():
 
                 await self.main_page.waitForResponse('https://www.fl.ru/projects/session/filter/', timeout=0)
                 cookies = await self.main_page.cookies()
+
+                if not os.path.exists('./cookies'):
+                    os.mkdir('./cookies')
                 with open(cookies_path, 'wb') as f:
                     pickle.dump(cookies, f)
 
@@ -163,19 +165,20 @@ class FL():
         if self.previous_orders_id:
             self.skip = False
         else:
-            logger.info('Первый запуск. Собираем существующие заказы...')
+            logger.info('[FL] Первый запуск. Собираем существующие заказы...')
 
         # Парсинг новых заказов
         content = await self.main_page.content()
         order_ids = await self.parseOrders(content)
         new_orders_ids = self.newOrdersCheck(order_ids)
-        logger.debug(f'[FL] Проверка... Новых запросов: {new_orders_ids}')
+        logger.debug(f'[FL] Новых запросов: {len(new_orders_ids)}')
 
         new_orders = []
-        for order_id in new_orders_ids:
-            order = await self.getOrderInfo(order_id)
-            if order:
-                new_orders.append(order)
+        if new_orders_ids:
+            for order_id in new_orders_ids:
+                order = await self.getOrderInfo(order_id)
+                if order:
+                    new_orders.append(order)
 
         logger.debug(f'[FL] Всего обработано запросов: {len(self.previous_orders_id)}')
         await self.browser.close()

@@ -1,10 +1,11 @@
 import os, sys 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-from aiogram import types, Dispatcher, Bot
+from aiogram import Dispatcher, Bot
 from aiogram.utils import executor
 
 import re
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from parsers.fl_parser import FL
@@ -67,7 +68,12 @@ async def KWork_scheduled():
 def start():
     logger.info('Бот вышел в онлайн')
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(FL_scheduled, trigger='interval', seconds=INTERVAL)
+
+    time = datetime.now()
+
+    scheduler.add_job(KWork_scheduled, trigger='interval', seconds=INTERVAL, next_run_time=time+timedelta(seconds=5))
+    scheduler.add_job(FL_scheduled, trigger='interval', seconds=INTERVAL, next_run_time=time+timedelta(minutes=5))
+
     scheduler.start()
 
 
