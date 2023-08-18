@@ -142,7 +142,7 @@ class KWork():
             num += 1
 
         logger.debug(f'[KWORK] Новых запросов: {len(orders)}')
-        logger.debug(f'[FL] Всего обработано запросов: {len(self.previous_order_links)}')
+        logger.debug(f'[KWORK] Всего обработано запросов: {len(self.previous_order_links)}')
         await browser.close()
 
         return orders
