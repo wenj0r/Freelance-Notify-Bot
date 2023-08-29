@@ -72,7 +72,7 @@ def start():
     time = datetime.now()
 
     scheduler.add_job(KWork_scheduled, trigger='interval', seconds=INTERVAL, next_run_time=time+timedelta(seconds=5))
-    scheduler.add_job(FL_scheduled, trigger='interval', seconds=INTERVAL, next_run_time=time+timedelta(minutes=5))
+    scheduler.add_job(FL_scheduled, trigger='interval', seconds=INTERVAL, next_run_time=time+timedelta(seconds=30))
 
     scheduler.start()
 

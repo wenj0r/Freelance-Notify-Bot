@@ -71,7 +71,6 @@ class FL():
 
     def parseOrderPage(self, content):
         order = {}
-
         soup = bs4.BeautifulSoup(content, 'lxml')
         try: 
 
