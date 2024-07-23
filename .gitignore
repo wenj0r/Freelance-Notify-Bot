@@ -3,6 +3,7 @@ venv/
 all.xml
 output.*
 result.*
+*.log
 __pycache__
 .env
 /logs

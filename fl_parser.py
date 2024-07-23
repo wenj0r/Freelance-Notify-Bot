@@ -1,5 +1,5 @@
-from pyppeteer import launch
-from pyppeteer_stealth import stealth
+from playwright.sync_api import sync_playwright
+from playwright_stealth import stealth_sync
 import bs4
 import re
 from fake_useragent import UserAgent
@@ -7,6 +7,7 @@ from fake_useragent import UserAgent
 from loggers import main_logger as logger
 import pickle
 import os
+import asyncio
 
 
 ua = UserAgent()
@@ -18,22 +19,11 @@ class FL():
         self.headless = headless
         self.previous_orders_id = []
         self.skip = True
-        self.start_parm = {
-        'headless' : self.headless,
-        'autoClose': False,
-        'args' : [
-            '--disable-infobars',
-            '--ignore-certificate-errors',
-            '--log-level = 30',
-            f'--user-agent = {ua.random}',
-            '--no-sandbox', # с этим параметром нужно вручную выставлять pyppeteer_home
-            #f'--proxy-server=http://localhost:1080' # если отделить '=' пробелами - не работает
-            '--window-size=1920,1040',
-            '--enable-extensions'
-            ]
-        }
+        
+        self.pw = sync_playwright().start()
 
-    async def parseOrders(self, content):
+
+    def parseOrders(self, content):
         soup = bs4.BeautifulSoup(content, 'lxml')
         divs = soup.find_all('div', id=re.compile('project-item'))
 
@@ -44,21 +34,20 @@ class FL():
         return orders
 
 
-    async def getOrderInfo(self, id: str):
+    def getOrderInfo(self, id: str):
         logger.debug(f'Обрабатывается объявление #{id}')
         url = base_url + id
         
-        page = await self.browser.newPage()
-        await page.setViewport(viewport={'width': 1920, 'height': 1040})
-        await stealth(page)
+        page = self.browser.new_page()
+        stealth_sync(page)
 
-        await page.goto(url, {'waitUntil': 'networkidle2'})
-        await page.waitForXPath("(//div[contains(@class, 'b-layout')])")
+        page.goto(url)
+        page.wait_for_load_state()
 
-        content = await page.content()
+        content = page.content()
         order = self.parseOrderPage(content)
 
-        await page.close()
+        page.close()
         
         if order:
             order['id'] = id
@@ -125,42 +114,38 @@ class FL():
             return []
 
 
-    async def update(self):
-        # ФУНКЦИЯ ДЛИННАЯ, Я УЖЕ ПОДЪУСТАЛ
-        # КОЛХОЗ, ДА. ЗДЕСЬ ПОЛЬЗОВАТЕЛЬ ЗАПОЛНЯЕТ ФИЛЬТРЫ, ЕСЛИ ПЕЧЕНЕК НЕТ
+    def getCookies(self):
+        self.browser = self.pw.chromium.launch(headless=False)
+        page = self.browser.new_page()
+        stealth_sync(page)
+        page.goto('https://fl.ru')
+        page.wait_for_load_state()
+        page.wait_for_selector("xpath=//a[contains(.,'Мои отклики')]", timeout=0)
+        
+        cookies = page.context.cookies()
+        self.browser.close()
+
+        if not os.path.exists('./cookies'):
+            os.mkdir('./cookies')
+        with open(cookies_path, 'wb') as f:
+            pickle.dump(cookies, f)
+
+
+    def getNewOrders(self):
         if not os.path.exists(cookies_path):
-            if self.start_parm['headless']:
-                self.start_parm['headless'] = False
-
-                self.browser = await launch(options=self.start_parm)
-                self.main_page = await self.browser.newPage()
-                await self.main_page.setViewport(viewport={'width': 1920, 'height': 1040})
-                await self.main_page.goto('https://fl.ru/projects')
-
-                await self.main_page.waitForResponse('https://www.fl.ru/projects/session/filter/', timeout=0)
-                cookies = await self.main_page.cookies()
-
-                if not os.path.exists('./cookies'):
-                    os.mkdir('./cookies')
-                with open(cookies_path, 'wb') as f:
-                    pickle.dump(cookies, f)
-
-                await self.browser.close()
-                self.start_parm['headless'] = self.headless
+            self.getCookies()
 
         # Полноценный запуск браузера
-        self.browser = await launch(options=self.start_parm)
-
-        self.main_page = await self.browser.newPage()
-        await self.main_page.setViewport(viewport={'width': 1920, 'height': 1040})
-        await stealth(self.main_page)
-
-        await self.main_page.goto('https://fl.ru/projects')
+        self.browser = self.pw.chromium.launch(headless=self.headless)
+        self.context = self.browser.new_context()
 
         with open(cookies_path, 'rb') as f:
             cookies = pickle.load(f)
-            await self.main_page.setCookie(*cookies)
-            await self.main_page.reload()
+            self.context.add_cookies(cookies)
+
+        self.main_page = self.context.new_page()
+        stealth_sync(self.main_page)
+        self.main_page.goto('https://fl.ru/projects')
         
         # Выдаст результат только, если история не пуста 
         if self.previous_orders_id:
@@ -169,19 +154,24 @@ class FL():
             logger.info('[FL] Первый запуск. Собираем существующие заказы...')
 
         # Парсинг новых заказов
-        content = await self.main_page.content()
-        order_ids = await self.parseOrders(content)
+        content = self.main_page.content()
+        order_ids = self.parseOrders(content)
         new_orders_ids = self.newOrdersCheck(order_ids)
         logger.debug(f'[FL] Новых запросов: {len(new_orders_ids)}')
 
         new_orders = []
         if new_orders_ids:
             for order_id in new_orders_ids:
-                order = await self.getOrderInfo(order_id)
+                order = self.getOrderInfo(order_id)
                 if order:
                     new_orders.append(order)
 
         logger.debug(f'[FL] Всего обработано запросов: {len(self.previous_orders_id)}')
-        await self.browser.close()
+        self.browser.close()
 
         return new_orders
+    
+    
+if __name__ == '__main__':
+    fl = FL()
+    print(fl.getNewOrders())
