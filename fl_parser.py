@@ -2,15 +2,11 @@ from playwright.sync_api import sync_playwright
 from playwright_stealth import stealth_sync
 import bs4
 import re
-from fake_useragent import UserAgent
 
 from loggers import main_logger as logger
 import pickle
 import os
-import asyncio
 
-
-ua = UserAgent()
 base_url = 'https://www.fl.ru/projects/'
 cookies_path = './cookies/fl.pickle'
 
