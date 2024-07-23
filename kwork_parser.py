@@ -1,7 +1,5 @@
-from pyppeteer import launch
 from loggers import main_logger as logger
 from random import randint
-import bs4
 import requests
 import time
 
