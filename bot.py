@@ -48,7 +48,8 @@ def FLScheduled():
     if new_orders:
         for order in new_orders:
             text = makeMessage(order, tag='FL')
-            asyncio.run(sendMessage(text))
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(sendMessage(text))
 
 
 def KWorkScheduled():
@@ -56,7 +57,8 @@ def KWorkScheduled():
     if new_orders:
         for order in new_orders:
             text = makeMessage(order, tag='KWORK')
-            asyncio.run(sendMessage(text))
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(sendMessage(text))
 
 
 if __name__ == '__main__':

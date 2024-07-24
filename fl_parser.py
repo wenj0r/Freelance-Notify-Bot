@@ -60,7 +60,7 @@ class FL():
         try: 
 
             # Проверка на исполнителя
-            if soup.find('span', text=re.compile('Исполнитель определен')): 
+            if soup.find('span', string=re.compile('Исполнитель определен')): 
                 return
 
             # Проверка для всех ли пользователей
@@ -79,10 +79,13 @@ class FL():
             order['category'] = f'{category} - {subcategory}'
 
             # Получение цены и дедлайна
-            div = soup.find('div', class_=re.compile('unmobile flex-shrink'))
-            divs = div.find_all('div', class_=re.compile('text-4'))
-            if divs[0]: order['price'] = divs[0].span.text.strip()
-            if divs[1]: order['deadline'] = divs[1].span.text.strip()
+            try:
+                div = soup.find('div', class_=re.compile('unmobile flex-shrink-0'))
+                divs = div.find_all('div', class_=re.compile('text-4'))
+                if divs[0]: order['price'] = divs[0].span.text.strip()
+                if divs[1]: order['deadline'] = divs[1].span.text.strip()
+            except (IndexError, AttributeError):
+                order['price'] = 'По договоренности'
 
             return order
 
@@ -127,7 +130,7 @@ class FL():
             pickle.dump(cookies, f)
 
 
-    def getNewOrders(self):
+    def startBrowser(self):
         if not os.path.exists(cookies_path):
             self.getCookies()
 
@@ -142,6 +145,10 @@ class FL():
         self.main_page = self.context.new_page()
         stealth_sync(self.main_page)
         self.main_page.goto('https://fl.ru/projects')
+
+
+    def getNewOrders(self):
+        self.startBrowser()
         
         # Выдаст результат только, если история не пуста 
         if self.previous_orders_id:
