@@ -1,3 +1,7 @@
+# To Fix "cannot switch to a different thread" Error
+from gevent import monkey
+monkey.patch_all()
+
 from aiogram import Bot
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime, timedelta

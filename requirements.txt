@@ -1,0 +1,8 @@
+aiogram
+APScheduler
+beautifulsoup4
+gevent
+playwright
+playwright_stealth
+python-dotenv
+Requests

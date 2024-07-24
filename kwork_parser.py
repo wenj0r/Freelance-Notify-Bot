@@ -110,10 +110,4 @@ class KWork():
         logger.debug(f'[KWORK] Всего обработано запросов: {len(self.previous_orders_id)}')
 
         return orders
-    
-    
-if __name__ == '__main__':
-    kwork=KWork()
-    kwork.getNewOrders()
-    kwork.getNewOrders()
 

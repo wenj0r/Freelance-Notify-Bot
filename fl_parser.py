@@ -166,8 +166,3 @@ class FL():
         self.browser.close()
 
         return new_orders
-    
-    
-if __name__ == '__main__':
-    fl = FL()
-    print(fl.getNewOrders())
