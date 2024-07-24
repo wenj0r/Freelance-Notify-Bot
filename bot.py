@@ -1,12 +1,11 @@
-# To Fix "cannot switch to a different thread" Error
+# To Fix "cannot switch to a different thread" error on Raspberry Pi
 from gevent import monkey
 monkey.patch_all()
 
-from aiogram import Bot
+import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime, timedelta
 import re
-import asyncio
 
 from fl_parser import FL
 from kwork_parser import KWork
@@ -35,21 +34,32 @@ def makeMessage(order: dict, tag: str):
         logger.error(f'Не удалось обработать текст заказа.\n{order}')
         logger.exception(e)
 
-async def sendMessage(msg: str):
-    async with Bot(token=TOKEN) as bot:
-        for user in USERS:
+def sendMessage(msg: str):
+    for user in USERS:
+        json_data = {'chat_id': user,
+                    'text': msg,
+                    'parse_mode': 'HTML',
+                    'link_preview_options': {'is_disabled': True}}
+    
+        attempts = 1
+        while attempts <= 3: 
             try:
-                await bot.send_message(user, msg, parse_mode='HTML', disable_web_page_preview=True)
+                resp = requests.post('https://api.telegram.org/bot'+TOKEN+'/sendMessage', json=json_data)
+                if resp.status_code == 200:
+                    break
+                else:
+                    logger.error('Не получилось отправить сообщение в Telegram')
             except Exception as e:
-                    logger.error(e)
+                logger.error(e)
+                
+            attempts += 1
 
 def FLScheduled():
     new_orders = fl.getNewOrders()
     if new_orders:
         for order in new_orders:
             text = makeMessage(order, tag='FL')
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(sendMessage(text))
+            sendMessage(text)
 
 
 def KWorkScheduled():
@@ -57,14 +67,12 @@ def KWorkScheduled():
     if new_orders:
         for order in new_orders:
             text = makeMessage(order, tag='KWORK')
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(sendMessage(text))
+            sendMessage(text)
 
 
 if __name__ == '__main__':
     fl = FL()
     kw = KWork()
-    bot = Bot(token=TOKEN)
     
     scheduler = BlockingScheduler(timezone="Europe/Moscow")
     scheduler.add_job(KWorkScheduled, trigger='interval', seconds=INTERVAL, next_run_time=datetime.now()+timedelta(seconds=5))
