@@ -61,7 +61,7 @@ class KWork():
                 self.previous_orders_id.append(order['id'])
                 
                 if not self.skip:
-                    order['link'] = base_url + 'orders/' + order['id']
+                    order['link'] = base_url + 'projects/' + order['id']
                     new_orders.append(order)
                 
                 # Список передыдущих заказов содержит только последние 2000 заказа
